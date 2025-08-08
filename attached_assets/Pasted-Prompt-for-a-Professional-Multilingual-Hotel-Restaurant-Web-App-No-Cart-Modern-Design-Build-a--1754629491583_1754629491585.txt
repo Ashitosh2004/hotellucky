@@ -1,0 +1,64 @@
+Prompt for a Professional Multilingual Hotel/Restaurant Web App (No Cart, Modern Design)
+
+Build a fully responsive, robust, and multilingual hotel/restaurant web application using Firebase, adhering to the following precise and error-free specifications:
+
+1. Role & Language Persistence
+On the initial visit, require users to select their role (Admin, South Indian Kitchen, Kolhapuri Kitchen, Customer Menu) and preferred language (Marathi, Hindi, English).
+
+Persist role and language selections in local storage and apply them across every page and module.
+
+Enable seamless switching of language at any time, updating all text—including menus, dashboards, buttons, order statuses, notifications, and popups—across the application in real time.
+
+2. Customer Menu — No Cart, Direct Order Flow
+Do NOT implement a cart system. Users should not add items to a cart or manage a multi-item basket.
+
+When a customer selects a menu item, immediately open a direct order popup:
+
+The popup should display item info, allow users to select/increment quantity, and require only the table number (no room number).
+
+Once confirmed, the order is submitted instantly to Firestore with all details (table, item, quantity, timestamps, status "new").
+
+Show a success message or notification after order placement.
+
+Make sure the design and interaction flow mimics top-tier, user-centric mobile food apps (but without cart functionality), focusing on speed, clarity, and ease of use.
+
+3. Modern UI Design
+Overhaul and refine the entire app’s design based on the latest UX/UI standards.
+
+Use Tailwind CSS or Bootstrap for clean layouts, consistent spacing, modern color palettes, and crisp typography.
+
+Use visually appealing buttons, cards, icons, and modals.
+
+Make critical controls visually intuitive and easy to find.
+
+Ensure all screens are fully responsive and provide a seamless mobile-first experience.
+
+Consistently use language and branding elements across all panels.
+
+Add a persistent order tracking icon/button always visible in the Customer Menu.
+
+Clicking this icon should display a clear, real-time summary and status updates of active and past orders using data synced from Firestore.
+
+4. Kitchen & Admin Panel Enhancements
+Fix all Firebase integration issues:
+
+Ensure kitchen panels (South Indian, Kolhapuri) always fetch and display live orders relevant to that kitchen only, updating in real time using Firestore listeners.
+
+Provide order details, status updates (accept, prepare, ready, reject), and instant sync with customers and admin views.
+
+Secure all admin/kitchen access with Firebase Authentication and robust role-based access control.
+
+In the Admin Dashboard, allow adding and managing menu items with input for name and description in all languages, price, and image upload (image converted to URL and stored in Firestore/Firebase Storage).
+
+Enhance the admin panel with a dynamic income/sales graph, showing real-time analytics from daily sales/orders.
+
+5. Technical & Quality Requirements
+Use Firestore snapshot listeners extensively for instant, error-free data syncing.
+
+Perform strict validation, error handling, and UI feedback for all inputs and transactions.
+
+Provide complete browser/device compatibility; all features must work flawlessly and consistently.
+
+Ensure all new changes and fixes thoroughly eliminate legacy cart code or references from all modules.
+
+You are to provide a production-ready, modern, error-free, and fully tested web application with NO cart feature—implementing direct ordering, perfect real-time data flows, properly fixed dashboard/panel access, and a best-in-class user interface.
