@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserRole, Language } from './types';
+import { IntroAnimation } from './components/IntroAnimation';
 import { RoleLanguageSelector } from './components/RoleLanguageSelector';
 import { CustomerMenu } from './components/CustomerMenu';
 import { KitchenDashboard } from './components/KitchenDashboard';
@@ -15,11 +16,17 @@ function App() {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(
     () => localStorage.getItem('userLanguage') as Language || 'en'
   );
+  const [showIntro, setShowIntro] = useState(true);
   const [showRoleSelector, setShowRoleSelector] = useState(!currentRole);
   const [showLoginModal, setShowLoginModal] = useState(false);
   
   const { user, loading } = useAuth();
   const { showNotification, NotificationComponent } = useNotification();
+
+  // Handle intro completion
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+  };
 
   // Handle role and language selection
   const handleRoleLanguageSelection = (role: UserRole, language: Language) => {
@@ -75,13 +82,18 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Intro Animation */}
+      {showIntro && (
+        <IntroAnimation onComplete={handleIntroComplete} />
+      )}
+
       {/* Role and Language Selector */}
-      {showRoleSelector && (
+      {!showIntro && showRoleSelector && (
         <RoleLanguageSelector onContinue={handleRoleLanguageSelection} />
       )}
 
       {/* Customer Menu View */}
-      {currentRole === 'customer' && !showRoleSelector && (
+      {!showIntro && currentRole === 'customer' && !showRoleSelector && (
         <CustomerMenu
           language={currentLanguage}
           onLanguageChange={handleLanguageChange}
@@ -89,7 +101,7 @@ function App() {
       )}
 
       {/* Kitchen Dashboard */}
-      {(currentRole === 'south-kitchen' || currentRole === 'kolhapuri-kitchen') && 
+      {!showIntro && (currentRole === 'south-kitchen' || currentRole === 'kolhapuri-kitchen') && 
        !showRoleSelector && 
        user && (
         <KitchenDashboard
@@ -101,7 +113,7 @@ function App() {
       )}
 
       {/* Admin Dashboard */}
-      {currentRole === 'admin' && !showRoleSelector && user && (
+      {!showIntro && currentRole === 'admin' && !showRoleSelector && user && (
         <AdminDashboard
           language={currentLanguage}
           onLanguageChange={handleLanguageChange}

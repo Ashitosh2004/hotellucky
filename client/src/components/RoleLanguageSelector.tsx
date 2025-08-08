@@ -51,27 +51,27 @@ export const RoleLanguageSelector: React.FC<RoleLanguageSelectorProps> = ({ onCo
   };
 
   return (
-    <div className="fixed inset-0 gradient-bg z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="card-modern rounded-2xl shadow-2xl p-8 max-w-md w-full animate-bounce-in hover-lift">
+    <div className="fixed inset-0 gradient-bg z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8 animate-fade-in">
+      <div className="card-modern rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full mx-4 animate-bounce-in hover-lift">
         {/* Hotel Lucky Logo */}
-        <div className="text-center mb-8 animate-scale-in animate-delay-200">
-          <div className="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-glow">
-            <Utensils className="text-white text-2xl" />
+        <div className="text-center mb-6 sm:mb-8 animate-scale-in animate-delay-200">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-glow">
+            <Utensils className="text-white text-xl sm:text-2xl" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
             {getTranslation('hotel_lucky', selectedLanguage)}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             {getTranslation('restaurant_management', selectedLanguage)}
           </p>
         </div>
 
         {/* Role Selection */}
-        <div className="mb-6 animate-slide-up animate-delay-300">
+        <div className="mb-4 sm:mb-6 animate-slide-up animate-delay-300">
           <label className="block text-sm font-medium text-gray-700 mb-3">
             {getTranslation('select_role', selectedLanguage)}
           </label>
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 gap-2 sm:gap-3">
             {roles.map((role) => {
               const Icon = role.icon;
               const isSelected = selectedRole === role.id;
@@ -79,18 +79,18 @@ export const RoleLanguageSelector: React.FC<RoleLanguageSelectorProps> = ({ onCo
                 <button
                   key={role.id}
                   onClick={() => setSelectedRole(role.id)}
-                  className={`p-4 border-2 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all duration-300 text-left hover-lift btn-modern ${
+                  className={`p-3 sm:p-4 border-2 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all duration-300 text-left hover-lift btn-modern ${
                     isSelected ? 'border-orange-500 bg-orange-50 animate-glow' : 'border-gray-200'
                   }`}
                   data-testid={`role-${role.id}`}
                 >
                   <div className="flex items-center">
-                    <Icon className="text-orange-500 mr-3" size={20} />
-                    <div>
-                      <div className="font-medium">
+                    <Icon className="text-orange-500 mr-2 sm:mr-3 flex-shrink-0" size={18} />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-sm sm:text-base">
                         {getTranslation(role.title, selectedLanguage)}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-xs sm:text-sm text-gray-500 truncate">
                         {getTranslation(role.description, selectedLanguage)}
                       </div>
                     </div>
@@ -102,23 +102,23 @@ export const RoleLanguageSelector: React.FC<RoleLanguageSelectorProps> = ({ onCo
         </div>
 
         {/* Language Selection */}
-        <div className="mb-6 animate-slide-up animate-delay-400">
+        <div className="mb-4 sm:mb-6 animate-slide-up animate-delay-400">
           <label className="block text-sm font-medium text-gray-700 mb-3">
             {getTranslation('select_language', selectedLanguage)}
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1 sm:gap-2">
             {languages.map((lang) => {
               const isSelected = selectedLanguage === lang.code;
               return (
                 <button
                   key={lang.code}
                   onClick={() => setSelectedLanguage(lang.code)}
-                  className={`p-3 border-2 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all duration-300 text-center hover-lift btn-modern ${
+                  className={`p-2 sm:p-3 border-2 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all duration-300 text-center hover-lift btn-modern ${
                     isSelected ? 'border-orange-500 bg-orange-50 animate-glow' : 'border-gray-200'
                   }`}
                   data-testid={`language-${lang.code}`}
                 >
-                  <div className="font-medium">{lang.name}</div>
+                  <div className="font-medium text-sm sm:text-base">{lang.name}</div>
                 </button>
               );
             })}
@@ -128,7 +128,7 @@ export const RoleLanguageSelector: React.FC<RoleLanguageSelectorProps> = ({ onCo
         <button
           onClick={handleContinue}
           disabled={!selectedRole || !selectedLanguage}
-          className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed btn-modern hover-lift animate-slide-up animate-delay-500"
+          className="w-full bg-orange-500 text-white py-2.5 sm:py-3 rounded-lg font-medium hover:bg-orange-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed btn-modern hover-lift animate-slide-up animate-delay-500 text-sm sm:text-base"
           data-testid="continue-button"
         >
           {getTranslation('continue', selectedLanguage)}
