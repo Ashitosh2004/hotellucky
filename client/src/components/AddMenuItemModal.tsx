@@ -24,9 +24,10 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
     descHi: '',
     descMr: '',
     price: '',
-    category: 'south-indian' as MenuCategory
+    category: 'south-indian' as MenuCategory,
+    imageUrl: ''
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const { addMenuItem } = useFirestore();
   const { showNotification } = useNotification();
@@ -38,6 +39,11 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
     
     if (!formData.nameEn || !formData.price) {
       showNotification('Please fill in all required fields', 'error');
+      return;
+    }
+
+    if (formData.imageUrl && !isValidImageUrl(formData.imageUrl)) {
+      showNotification('Please enter a valid image URL', 'error');
       return;
     }
 
@@ -57,11 +63,11 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
         },
         price: parseFloat(formData.price),
         category: formData.category,
-        imageUrl: '',
+        imageUrl: formData.imageUrl,
         isAvailable: true
       };
 
-      await addMenuItem(menuItem, imageFile || undefined);
+      await addMenuItem(menuItem);
       
       showNotification('Menu item added successfully!', 'success');
       onClose();
@@ -82,13 +88,27 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
       descHi: '',
       descMr: '',
       price: '',
-      category: 'south-indian'
+      category: 'south-indian',
+      imageUrl: ''
     });
-    setImageFile(null);
+    setImagePreview('');
   };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Handle image URL preview
+    if (field === 'imageUrl') {
+      if (value && isValidImageUrl(value)) {
+        setImagePreview(value);
+      } else {
+        setImagePreview('');
+      }
+    }
+  };
+
+  const isValidImageUrl = (url: string) => {
+    return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url) || url.includes('unsplash.com') || url.includes('pexels.com') || url.includes('pixabay.com');
   };
 
   return (
@@ -202,27 +222,37 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
             </select>
           </div>
 
-          {/* Image Upload */}
+          {/* Image URL */}
           <div className="animate-scale-in animate-delay-300">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {getTranslation('image', language)}
+              {getTranslation('image', language)} URL
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-              <input 
-                type="file" 
-                onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                className="hidden" 
-                accept="image/*"
-                id="image-upload"
-                data-testid="item-image"
-              />
-              <label htmlFor="image-upload" className="cursor-pointer">
-                <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm text-gray-600">
-                  {imageFile ? imageFile.name : 'Click to upload image'}
-                </p>
-              </label>
-            </div>
+            <input 
+              type="url" 
+              value={formData.imageUrl}
+              onChange={(e) => handleInputChange('imageUrl', e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
+              placeholder="https://example.com/image.jpg"
+              data-testid="item-image-url"
+            />
+            {imagePreview && (
+              <div className="mt-3 animate-fade-in">
+                <img 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
+                  onError={(e) => {
+                    setImagePreview('');
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                  data-testid="image-preview"
+                />
+                <p className="text-xs text-gray-500 mt-1 text-center">Image Preview</p>
+              </div>
+            )}
+            <p className="text-xs text-gray-500 mt-1">
+              Enter a direct image URL (jpg, png, gif, webp, svg)
+            </p>
           </div>
           
           {/* Action Buttons */}

@@ -68,19 +68,10 @@ export const useFirestore = () => {
     return () => unsubscribe();
   }, []);
 
-  const addMenuItem = async (item: Omit<MenuItem, 'id' | 'createdAt'>, imageFile?: File): Promise<void> => {
+  const addMenuItem = async (item: Omit<MenuItem, 'id' | 'createdAt'>): Promise<void> => {
     try {
-      let imageUrl = '';
-      
-      if (imageFile) {
-        const imageRef = ref(storage, `menu-items/${Date.now()}-${imageFile.name}`);
-        const snapshot = await uploadBytes(imageRef, imageFile);
-        imageUrl = await getDownloadURL(snapshot.ref);
-      }
-
       await addDoc(collection(db, 'menuItems'), {
         ...item,
-        imageUrl,
         createdAt: Timestamp.now()
       });
     } catch (error) {
