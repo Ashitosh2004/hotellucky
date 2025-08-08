@@ -1,0 +1,1069 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Lucky - Restaurant Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-orange': '#F97316',
+                        'brand-red': '#DC2626',
+                        'brand-green': '#059669',
+                        'warm-gray': '#FAFAFA'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .animate-slide-up {
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-in;
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.33); }
+            80%, 100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="font-inter bg-warm-gray min-h-screen">
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+        import { getStorage } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyApqx0DBFMFZQ8jg3ZUNM3zsccu2TbHYIQ",
+            authDomain: "hotellucky-76138.firebaseapp.com",
+            projectId: "hotellucky-76138",
+            storageBucket: "hotellucky-76138.firebasestorage.app",
+            messagingSenderId: "121453585641",
+            appId: "1:121453585641:web:2429727e7d2df63b4abc78",
+            measurementId: "G-Q98C09YRGY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Make Firebase available globally
+        window.Firebase = { auth, db, storage, signInWithEmailAndPassword, onAuthStateChanged, collection, addDoc, onSnapshot, query, where, orderBy, updateDoc, doc };
+    </script>
+
+    <!-- @COMPONENT: AppContainer [Main application wrapper with role and language state] -->
+    <div id="app-container" class="animate-fade-in">
+        
+        <!-- @COMPONENT: RoleLanguageSelector [Initial selection screen] -->
+        <div id="role-language-selector" class="fixed inset-0 bg-gradient-to-br from-brand-orange via-red-500 to-brand-red z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full animate-slide-up">
+                <!-- Hotel Lucky Logo -->
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 bg-brand-orange rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-utensils text-white text-2xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Hotel Lucky</h1>
+                    <p class="text-gray-600">Welcome to our restaurant management system</p>
+                </div>
+
+                <!-- Role Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Select Your Role</label>
+                    <div class="grid grid-cols-1 gap-3">
+                        <button data-role="customer" class="role-btn p-4 border-2 border-gray-200 rounded-lg hover:border-brand-orange hover:bg-orange-50 transition-all duration-200 text-left">
+                            <div class="flex items-center">
+                                <i class="fas fa-user text-brand-orange mr-3"></i>
+                                <div>
+                                    <div class="font-medium">Customer Menu</div>
+                                    <div class="text-sm text-gray-500">Browse menu and place orders</div>
+                                </div>
+                            </div>
+                        </button>
+                        <button data-role="south-kitchen" class="role-btn p-4 border-2 border-gray-200 rounded-lg hover:border-brand-orange hover:bg-orange-50 transition-all duration-200 text-left">
+                            <div class="flex items-center">
+                                <i class="fas fa-pepper-hot text-brand-orange mr-3"></i>
+                                <div>
+                                    <div class="font-medium">South Indian Kitchen</div>
+                                    <div class="text-sm text-gray-500">Manage South Indian orders</div>
+                                </div>
+                            </div>
+                        </button>
+                        <button data-role="kolhapuri-kitchen" class="role-btn p-4 border-2 border-gray-200 rounded-lg hover:border-brand-orange hover:bg-orange-50 transition-all duration-200 text-left">
+                            <div class="flex items-center">
+                                <i class="fas fa-fire text-brand-orange mr-3"></i>
+                                <div>
+                                    <div class="font-medium">Kolhapuri Kitchen</div>
+                                    <div class="text-sm text-gray-500">Manage Kolhapuri orders</div>
+                                </div>
+                            </div>
+                        </button>
+                        <button data-role="admin" class="role-btn p-4 border-2 border-gray-200 rounded-lg hover:border-brand-orange hover:bg-orange-50 transition-all duration-200 text-left">
+                            <div class="flex items-center">
+                                <i class="fas fa-cog text-brand-orange mr-3"></i>
+                                <div>
+                                    <div class="font-medium">Admin Dashboard</div>
+                                    <div class="text-sm text-gray-500">Manage system and analytics</div>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Language Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Select Language</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button data-lang="en" class="lang-btn p-3 border-2 border-gray-200 rounded-lg hover:border-brand-orange hover:bg-orange-50 transition-all duration-200 text-center">
+                            <div class="font-medium">English</div>
+                        </button>
+                        <button data-lang="hi" class="lang-btn p-3 border-2 border-gray-200 rounded-lg hover:border-brand-orange hover:bg-orange-50 transition-all duration-200 text-center">
+                            <div class="font-medium">हिंदी</div>
+                        </button>
+                        <button data-lang="mr" class="lang-btn p-3 border-2 border-gray-200 rounded-lg hover:border-brand-orange hover:bg-orange-50 transition-all duration-200 text-center">
+                            <div class="font-medium">मराठी</div>
+                        </button>
+                    </div>
+                </div>
+
+                <button id="continue-btn" class="w-full bg-brand-orange text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Continue
+                </button>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: RoleLanguageSelector -->
+
+        <!-- @COMPONENT: CustomerMenuView [Customer interface for browsing menu and ordering] -->
+        <div id="customer-view" class="hidden">
+            <!-- Navigation Header -->
+            <nav class="bg-white shadow-sm border-b sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center h-16">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-brand-orange rounded-full flex items-center justify-center">
+                                <i class="fas fa-utensils text-white"></i>
+                            </div>
+                            <h1 class="ml-3 text-xl font-bold text-gray-800">Hotel Lucky</h1>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <!-- Language Switcher -->
+                            <select id="language-switcher" class="border border-gray-300 rounded-lg px-3 py-1 text-sm">
+                                <option value="en">English</option>
+                                <option value="hi">हिंदी</option>
+                                <option value="mr">मराठी</option>
+                            </select>
+                            <!-- Order Tracking Button -->
+                            <button id="order-tracking-btn" class="relative bg-brand-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-200">
+                                <i class="fas fa-receipt mr-2"></i>
+                                <span data-translation="my_orders">My Orders</span>
+                                <span id="order-count" class="absolute -top-2 -right-2 bg-brand-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Welcome Section -->
+                <div class="text-center mb-8 animate-slide-up">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2" data-translation="welcome_message">Welcome to Hotel Lucky</h2>
+                    <p class="text-gray-600" data-translation="menu_subtitle">Discover our delicious authentic cuisine</p>
+                </div>
+
+                <!-- Menu Categories -->
+                <div class="mb-8">
+                    <div class="flex space-x-4 overflow-x-auto pb-2">
+                        <button class="category-filter active bg-brand-orange text-white px-6 py-2 rounded-full whitespace-nowrap font-medium" data-category="all">
+                            <span data-translation="all_items">All Items</span>
+                        </button>
+                        <button class="category-filter bg-gray-200 text-gray-700 px-6 py-2 rounded-full whitespace-nowrap font-medium hover:bg-gray-300 transition-colors duration-200" data-category="south-indian">
+                            <span data-translation="south_indian">South Indian</span>
+                        </button>
+                        <button class="category-filter bg-gray-200 text-gray-700 px-6 py-2 rounded-full whitespace-nowrap font-medium hover:bg-gray-300 transition-colors duration-200" data-category="kolhapuri">
+                            <span data-translation="kolhapuri">Kolhapuri</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Menu Items Grid -->
+                <div id="menu-items" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- South Indian Items -->
+                    <!-- A crispy golden dosa with coconut chutney and sambar -->
+                    <div class="menu-item bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 animate-slide-up" data-category="south-indian" data-item-id="dosa-masala">
+                        <img src="https://pixabay.com/get/g85d9aa0090fb77909a9a64dc96c4874b8dcb45eba9510b52148f0fbdaf869f8cdadab8d5c6ae1ebe3194e24bdceba590fd1bf9d502a6b7372c98d538e7ecdb34_1280.jpg" alt="Masala Dosa" class="w-full h-48 object-cover" />
+                        <div class="p-4">
+                            <h3 class="font-semibold text-lg mb-2">Masala Dosa</h3>
+                            <p class="text-gray-600 text-sm mb-3">Crispy dosa with spiced potato filling</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-brand-orange font-bold text-lg">₹120</span>
+                                <button class="order-item-btn bg-brand-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-200">
+                                    <span data-translation="order_now">Order Now</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- A bowl of aromatic sambar with vegetables -->
+                    <div class="menu-item bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 animate-slide-up" data-category="south-indian" data-item-id="sambar-rice">
+                        <img src="https://pixabay.com/get/gf6ad0f8323e50eea803cfcd80f50ec30d3dd7edfe4520879e81765636ff124d0fcd2098aad613a1408442155923eed338b3c291b6f65b092955d44e58bd66ef0_1280.jpg" alt="Sambar Rice" class="w-full h-48 object-cover" />
+                        <div class="p-4">
+                            <h3 class="font-semibold text-lg mb-2">Sambar Rice</h3>
+                            <p class="text-gray-600 text-sm mb-3">Steamed rice with aromatic sambar</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-brand-orange font-bold text-lg">₹90</span>
+                                <button class="order-item-btn bg-brand-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-200">
+                                    <span data-translation="order_now">Order Now</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- A plate of soft idli with chutneys -->
+                    <div class="menu-item bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 animate-slide-up" data-category="south-indian" data-item-id="idli-sambar">
+                        <img src="https://images.unsplash.com/photo-1589301760014-d929f3979dbc?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" alt="Idli Sambar" class="w-full h-48 object-cover" />
+                        <div class="p-4">
+                            <h3 class="font-semibold text-lg mb-2">Idli Sambar</h3>
+                            <p class="text-gray-600 text-sm mb-3">Soft steamed rice cakes with sambar</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-brand-orange font-bold text-lg">₹80</span>
+                                <button class="order-item-btn bg-brand-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-200">
+                                    <span data-translation="order_now">Order Now</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kolhapuri Items -->
+                    <!-- A spicy red Kolhapuri chicken curry -->
+                    <div class="menu-item bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 animate-slide-up" data-category="kolhapuri" data-item-id="kolhapuri-chicken">
+                        <img src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" alt="Kolhapuri Chicken" class="w-full h-48 object-cover" />
+                        <div class="p-4">
+                            <h3 class="font-semibold text-lg mb-2">Kolhapuri Chicken</h3>
+                            <p class="text-gray-600 text-sm mb-3">Spicy traditional Kolhapuri chicken curry</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-brand-orange font-bold text-lg">₹280</span>
+                                <button class="order-item-btn bg-brand-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-200">
+                                    <span data-translation="order_now">Order Now</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- A spicy Kolhapuri mutton curry with traditional spices -->
+                    <div class="menu-item bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 animate-slide-up" data-category="kolhapuri" data-item-id="kolhapuri-mutton">
+                        <img src="https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" alt="Kolhapuri Mutton" class="w-full h-48 object-cover" />
+                        <div class="p-4">
+                            <h3 class="font-semibold text-lg mb-2">Kolhapuri Mutton</h3>
+                            <p class="text-gray-600 text-sm mb-3">Authentic spicy mutton curry</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-brand-orange font-bold text-lg">₹320</span>
+                                <button class="order-item-btn bg-brand-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-200">
+                                    <span data-translation="order_now">Order Now</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Traditional Kolhapuri bhel with vegetables -->
+                    <div class="menu-item bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 animate-slide-up" data-category="kolhapuri" data-item-id="kolhapuri-bhel">
+                        <img src="https://images.unsplash.com/photo-1606491956689-2ea866880c84?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" alt="Kolhapuri Bhel" class="w-full h-48 object-cover" />
+                        <div class="p-4">
+                            <h3 class="font-semibold text-lg mb-2">Kolhapuri Bhel</h3>
+                            <p class="text-gray-600 text-sm mb-3">Traditional spicy vegetable curry</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-brand-orange font-bold text-lg">₹180</span>
+                                <button class="order-item-btn bg-brand-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-200">
+                                    <span data-translation="order_now">Order Now</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <!-- @END_COMPONENT: CustomerMenuView -->
+
+        <!-- @COMPONENT: KitchenView [Kitchen staff interface for managing orders] -->
+        <div id="kitchen-view" class="hidden">
+            <!-- Kitchen Navigation -->
+            <nav class="bg-white shadow-sm border-b sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center h-16">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-brand-orange rounded-full flex items-center justify-center">
+                                <i class="fas fa-fire text-white"></i>
+                            </div>
+                            <h1 class="ml-3 text-xl font-bold text-gray-800">Kitchen Dashboard</h1>
+                            <span id="kitchen-type" class="ml-4 px-3 py-1 bg-brand-orange text-white text-sm rounded-full"></span>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <select id="kitchen-language-switcher" class="border border-gray-300 rounded-lg px-3 py-1 text-sm">
+                                <option value="en">English</option>
+                                <option value="hi">हिंदी</option>
+                                <option value="mr">मराठी</option>
+                            </select>
+                            <button id="kitchen-logout" class="text-gray-600 hover:text-gray-800">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Kitchen Orders -->
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Active Orders</h2>
+                    <p class="text-gray-600">Manage incoming orders for your kitchen</p>
+                </div>
+
+                <!-- Order Status Filters -->
+                <div class="mb-6">
+                    <div class="flex space-x-4 overflow-x-auto pb-2">
+                        <button class="status-filter active bg-brand-orange text-white px-4 py-2 rounded-lg whitespace-nowrap" data-status="all">
+                            All Orders
+                        </button>
+                        <button class="status-filter bg-gray-200 text-gray-700 px-4 py-2 rounded-lg whitespace-nowrap hover:bg-gray-300" data-status="new">
+                            New
+                        </button>
+                        <button class="status-filter bg-gray-200 text-gray-700 px-4 py-2 rounded-lg whitespace-nowrap hover:bg-gray-300" data-status="preparing">
+                            Preparing
+                        </button>
+                        <button class="status-filter bg-gray-200 text-gray-700 px-4 py-2 rounded-lg whitespace-nowrap hover:bg-gray-300" data-status="ready">
+                            Ready
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Orders Grid -->
+                <div id="kitchen-orders" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Order items will be dynamically populated -->
+                </div>
+            </main>
+        </div>
+        <!-- @END_COMPONENT: KitchenView -->
+
+        <!-- @COMPONENT: AdminView [Admin dashboard for managing system] -->
+        <div id="admin-view" class="hidden">
+            <!-- Admin Navigation -->
+            <nav class="bg-white shadow-sm border-b sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center h-16">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-brand-orange rounded-full flex items-center justify-center">
+                                <i class="fas fa-cog text-white"></i>
+                            </div>
+                            <h1 class="ml-3 text-xl font-bold text-gray-800">Admin Dashboard</h1>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <select id="admin-language-switcher" class="border border-gray-300 rounded-lg px-3 py-1 text-sm">
+                                <option value="en">English</option>
+                                <option value="hi">हिंदी</option>
+                                <option value="mr">मराठी</option>
+                            </select>
+                            <button id="admin-logout" class="text-gray-600 hover:text-gray-800">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Dashboard Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-md p-6 animate-slide-up">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-brand-orange rounded-lg flex items-center justify-center">
+                                <i class="fas fa-receipt text-white"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600 text-sm">Today's Orders</p>
+                                <p class="text-2xl font-bold text-gray-800">24</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 animate-slide-up">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-brand-green rounded-lg flex items-center justify-center">
+                                <i class="fas fa-rupee-sign text-white"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600 text-sm">Today's Revenue</p>
+                                <p class="text-2xl font-bold text-gray-800">₹4,680</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 animate-slide-up">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-white"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600 text-sm">Avg. Prep Time</p>
+                                <p class="text-2xl font-bold text-gray-800">18 min</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 animate-slide-up">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-line text-white"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600 text-sm">Growth</p>
+                                <p class="text-2xl font-bold text-gray-800">+12%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <button id="add-menu-item-btn" class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-300 text-left animate-slide-up">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-brand-orange rounded-lg flex items-center justify-center">
+                                <i class="fas fa-plus text-white"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-semibold text-gray-800">Add Menu Item</h3>
+                                <p class="text-gray-600">Add new dishes to the menu</p>
+                            </div>
+                        </div>
+                    </button>
+                    <button id="view-all-orders-btn" class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-300 text-left animate-slide-up">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-brand-green rounded-lg flex items-center justify-center">
+                                <i class="fas fa-list text-white"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-semibold text-gray-800">View All Orders</h3>
+                                <p class="text-gray-600">Monitor all restaurant orders</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Sales Chart -->
+                <div class="bg-white rounded-xl shadow-md p-6 animate-slide-up">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Daily Sales Overview</h3>
+                    <div class="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+                        <div class="text-center text-gray-500">
+                            <i class="fas fa-chart-bar text-4xl mb-2"></i>
+                            <p>Sales chart will be implemented here</p>
+                            <p class="text-sm">Real-time analytics from Firebase data</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <!-- @END_COMPONENT: AdminView -->
+
+        <!-- @COMPONENT: LoginModal [Authentication modal for kitchen and admin access] -->
+        <div id="login-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full animate-slide-up">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-brand-orange rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-lock text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Secure Access</h2>
+                    <p class="text-gray-600">Please authenticate to continue</p>
+                </div>
+                
+                <form id="login-form">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="login-email" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent" placeholder="Enter your email" value="hotellucky2025@gmail.com">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="login-password" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent" placeholder="Enter your password" value="hotellucky">
+                    </div>
+                    <button type="submit" id="login-submit" class="w-full bg-brand-orange text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors duration-200">
+                        <span class="login-text">Sign In</span>
+                        <i class="fas fa-spinner fa-spin hidden ml-2"></i>
+                    </button>
+                </form>
+                
+                <button id="login-cancel" class="w-full mt-4 text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                    Cancel
+                </button>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: LoginModal -->
+
+        <!-- @COMPONENT: OrderModal [Direct order placement modal] -->
+        <div id="order-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full animate-slide-up">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">Place Order</h2>
+                    <button id="close-order-modal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="order-item-details" class="mb-6">
+                    <!-- Item details will be populated here -->
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                    <div class="flex items-center space-x-4">
+                        <button id="quantity-decrease" class="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors duration-200">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span id="quantity-display" class="text-xl font-semibold w-8 text-center">1</span>
+                        <button id="quantity-increase" class="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors duration-200">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Table Number</label>
+                    <input type="number" id="table-number" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent" placeholder="Enter table number" min="1" max="50">
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button id="cancel-order" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button id="confirm-order" class="flex-1 bg-brand-orange text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors duration-200">
+                        <span class="order-text">Confirm Order</span>
+                        <i class="fas fa-spinner fa-spin hidden ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: OrderModal -->
+
+        <!-- @COMPONENT: OrderTrackingModal [Customer order tracking interface] -->
+        <div id="order-tracking-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto animate-slide-up">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">My Orders</h2>
+                    <button id="close-tracking-modal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="customer-orders" class="space-y-4">
+                    <!-- Customer orders will be populated here -->
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: OrderTrackingModal -->
+
+        <!-- @COMPONENT: AddMenuItemModal [Admin interface for adding menu items] -->
+        <div id="add-menu-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full animate-slide-up">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">Add Menu Item</h2>
+                    <button id="close-add-menu-modal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="add-menu-form">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Item Name (English)</label>
+                        <input type="text" id="item-name-en" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent" placeholder="Enter item name">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Item Name (Hindi)</label>
+                        <input type="text" id="item-name-hi" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent" placeholder="हिंदी नाम दर्ज करें">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Item Name (Marathi)</label>
+                        <input type="text" id="item-name-mr" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent" placeholder="मराठी नाव टाका">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description (English)</label>
+                        <textarea id="item-desc-en" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent" rows="3" placeholder="Enter description"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Price (₹)</label>
+                        <input type="number" id="item-price" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent" placeholder="Enter price" min="1">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                        <select id="item-category" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent">
+                            <option value="south-indian">South Indian</option>
+                            <option value="kolhapuri">Kolhapuri</option>
+                        </select>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
+                        <input type="file" id="item-image" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent" accept="image/*">
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <button type="button" id="cancel-add-menu" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit" id="submit-menu-item" class="flex-1 bg-brand-orange text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors duration-200">
+                            <span class="add-text">Add Item</span>
+                            <i class="fas fa-spinner fa-spin hidden ml-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: AddMenuItemModal -->
+
+    </div>
+    <!-- @END_COMPONENT: AppContainer -->
+
+    <script>
+        // Application State
+        let currentRole = localStorage.getItem('userRole') || null;
+        let currentLanguage = localStorage.getItem('userLanguage') || 'en';
+        let currentOrderQuantity = 1;
+        let selectedMenuItem = null;
+        let userOrders = [];
+
+        // Translation Dictionary
+        const translations = {
+            en: {
+                welcome_message: "Welcome to Hotel Lucky",
+                menu_subtitle: "Discover our delicious authentic cuisine",
+                all_items: "All Items",
+                south_indian: "South Indian",
+                kolhapuri: "Kolhapuri",
+                order_now: "Order Now",
+                my_orders: "My Orders"
+            },
+            hi: {
+                welcome_message: "होटल लकी में आपका स्वागत है",
+                menu_subtitle: "हमारे स्वादिष्ट प्रामाणिक व्यंजनों का आनंद लें",
+                all_items: "सभी व्यंजन",
+                south_indian: "दक्षिण भारतीय",
+                kolhapuri: "कोल्हापुरी",
+                order_now: "अभी ऑर्डर करें",
+                my_orders: "मेरे ऑर्डर"
+            },
+            mr: {
+                welcome_message: "हॉटेल लकी मध्ये तुमचे स्वागत आहे",
+                menu_subtitle: "आमच्या स्वादिष्ट अस्सल पाककलेचा आनंद घ्या",
+                all_items: "सर्व पदार्थ",
+                south_indian: "दक्षिण भारतीय",
+                kolhapuri: "कोल्हापुरी",
+                order_now: "आता ऑर्डर करा",
+                my_orders: "माझे ऑर्डर"
+            }
+        };
+
+        // Utility Functions
+        function updateLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('userLanguage', lang);
+            
+            // Update all translatable elements
+            document.querySelectorAll('[data-translation]').forEach(element => {
+                const key = element.getAttribute('data-translation');
+                if (translations[lang] && translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // Update language selectors
+            document.querySelectorAll('select[id$="language-switcher"]').forEach(select => {
+                select.value = lang;
+            });
+        }
+
+        function showNotification(message, type = 'success') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg animate-slide-up ${
+                type === 'success' ? 'bg-brand-green text-white' : 'bg-brand-red text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function switchView(viewId) {
+            // Hide all views
+            document.querySelectorAll('#customer-view, #kitchen-view, #admin-view').forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            // Show selected view
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        // Initialize Application
+        function initializeApp() {
+            if (currentRole) {
+                document.getElementById('role-language-selector').classList.add('hidden');
+                
+                if (currentRole === 'customer') {
+                    switchView('customer-view');
+                } else {
+                    showLoginModal();
+                }
+            }
+            
+            updateLanguage(currentLanguage);
+            setupEventListeners();
+        }
+
+        // Event Listeners Setup
+        function setupEventListeners() {
+            // Role and Language Selection
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('border-brand-orange', 'bg-orange-50'));
+                    this.classList.add('border-brand-orange', 'bg-orange-50');
+                    currentRole = this.dataset.role;
+                    checkContinueButton();
+                });
+            });
+
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('border-brand-orange', 'bg-orange-50'));
+                    this.classList.add('border-brand-orange', 'bg-orange-50');
+                    currentLanguage = this.dataset.lang;
+                    checkContinueButton();
+                });
+            });
+
+            document.getElementById('continue-btn').addEventListener('click', function() {
+                if (currentRole && currentLanguage) {
+                    localStorage.setItem('userRole', currentRole);
+                    localStorage.setItem('userLanguage', currentLanguage);
+                    
+                    document.getElementById('role-language-selector').classList.add('hidden');
+                    
+                    if (currentRole === 'customer') {
+                        switchView('customer-view');
+                        loadMenuItems();
+                    } else {
+                        showLoginModal();
+                    }
+                    
+                    updateLanguage(currentLanguage);
+                }
+            });
+
+            // Language Switchers
+            document.querySelectorAll('select[id$="language-switcher"]').forEach(switcher => {
+                switcher.addEventListener('change', function() {
+                    updateLanguage(this.value);
+                });
+            });
+
+            // Customer Menu
+            document.querySelectorAll('.order-item-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const menuItem = this.closest('.menu-item');
+                    selectedMenuItem = {
+                        id: menuItem.dataset.itemId,
+                        name: menuItem.querySelector('h3').textContent,
+                        price: menuItem.querySelector('.text-brand-orange').textContent,
+                        category: menuItem.dataset.category,
+                        image: menuItem.querySelector('img').src
+                    };
+                    showOrderModal();
+                });
+            });
+
+            // Category Filters
+            document.querySelectorAll('.category-filter').forEach(filter => {
+                filter.addEventListener('click', function() {
+                    document.querySelectorAll('.category-filter').forEach(f => {
+                        f.classList.remove('active', 'bg-brand-orange', 'text-white');
+                        f.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+                    this.classList.add('active', 'bg-brand-orange', 'text-white');
+                    this.classList.remove('bg-gray-200', 'text-gray-700');
+                    
+                    filterMenuItems(this.dataset.category);
+                });
+            });
+
+            // Order Tracking
+            document.getElementById('order-tracking-btn').addEventListener('click', showOrderTrackingModal);
+
+            // Order Modal
+            document.getElementById('close-order-modal').addEventListener('click', hideOrderModal);
+            document.getElementById('cancel-order').addEventListener('click', hideOrderModal);
+            document.getElementById('quantity-decrease').addEventListener('click', () => {
+                if (currentOrderQuantity > 1) {
+                    currentOrderQuantity--;
+                    document.getElementById('quantity-display').textContent = currentOrderQuantity;
+                }
+            });
+            document.getElementById('quantity-increase').addEventListener('click', () => {
+                currentOrderQuantity++;
+                document.getElementById('quantity-display').textContent = currentOrderQuantity;
+            });
+            document.getElementById('confirm-order').addEventListener('click', confirmOrder);
+
+            // Login Modal
+            document.getElementById('login-cancel').addEventListener('click', hideLoginModal);
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+
+            // Admin Functions
+            document.getElementById('add-menu-item-btn')?.addEventListener('click', showAddMenuModal);
+            
+            // Kitchen logout
+            document.getElementById('kitchen-logout')?.addEventListener('click', logout);
+            document.getElementById('admin-logout')?.addEventListener('click', logout);
+        }
+
+        function checkContinueButton() {
+            const continueBtn = document.getElementById('continue-btn');
+            if (currentRole && currentLanguage) {
+                continueBtn.disabled = false;
+                continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                continueBtn.disabled = true;
+                continueBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function filterMenuItems(category) {
+            document.querySelectorAll('.menu-item').forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function showOrderModal() {
+            if (!selectedMenuItem) return;
+            
+            // Reset quantity
+            currentOrderQuantity = 1;
+            document.getElementById('quantity-display').textContent = currentOrderQuantity;
+            document.getElementById('table-number').value = '';
+            
+            // Populate item details
+            document.getElementById('order-item-details').innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <img src="${selectedMenuItem.image}" alt="${selectedMenuItem.name}" class="w-16 h-16 rounded-lg object-cover">
+                    <div>
+                        <h3 class="font-semibold text-lg">${selectedMenuItem.name}</h3>
+                        <p class="text-brand-orange font-bold">${selectedMenuItem.price}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('order-modal').classList.remove('hidden');
+        }
+
+        function hideOrderModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+            selectedMenuItem = null;
+        }
+
+        function showOrderTrackingModal() {
+            // TODO: Load customer orders from Firebase
+            document.getElementById('customer-orders').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-receipt text-4xl mb-2"></i>
+                    <p>No orders yet</p>
+                    <p class="text-sm">Your orders will appear here</p>
+                </div>
+            `;
+            document.getElementById('order-tracking-modal').classList.remove('hidden');
+        }
+
+        function showLoginModal() {
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        function hideLoginModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+            // Return to role selection
+            currentRole = null;
+            localStorage.removeItem('userRole');
+            document.getElementById('role-language-selector').classList.remove('hidden');
+        }
+
+        function showAddMenuModal() {
+            document.getElementById('add-menu-modal').classList.remove('hidden');
+        }
+
+        async function confirmOrder() {
+            const tableNumber = document.getElementById('table-number').value;
+            
+            if (!tableNumber) {
+                showNotification('Please enter table number', 'error');
+                return;
+            }
+            
+            const confirmBtn = document.getElementById('confirm-order');
+            const orderText = confirmBtn.querySelector('.order-text');
+            const spinner = confirmBtn.querySelector('.fa-spinner');
+            
+            // Show loading
+            orderText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            confirmBtn.disabled = true;
+            
+            try {
+                // TODO: Submit order to Firebase
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                showNotification(`Order placed successfully for table ${tableNumber}!`);
+                hideOrderModal();
+                
+                // Update order count
+                const orderCount = document.getElementById('order-count');
+                const currentCount = parseInt(orderCount.textContent) || 0;
+                orderCount.textContent = currentCount + 1;
+                orderCount.classList.remove('hidden');
+                
+            } catch (error) {
+                showNotification('Failed to place order. Please try again.', 'error');
+            } finally {
+                // Hide loading
+                orderText.classList.remove('hidden');
+                spinner.classList.add('hidden');
+                confirmBtn.disabled = false;
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            const submitBtn = document.getElementById('login-submit');
+            const loginText = submitBtn.querySelector('.login-text');
+            const spinner = submitBtn.querySelector('.fa-spinner');
+            
+            // Show loading
+            loginText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            submitBtn.disabled = true;
+            
+            try {
+                // TODO: Implement Firebase authentication
+                // For demo purposes, using hardcoded credentials
+                if (email === 'hotellucky2025@gmail.com' && password === 'hotellucky') {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    document.getElementById('login-modal').classList.add('hidden');
+                    
+                    if (currentRole === 'admin') {
+                        switchView('admin-view');
+                    } else {
+                        switchView('kitchen-view');
+                        document.getElementById('kitchen-type').textContent = 
+                            currentRole === 'south-kitchen' ? 'South Indian Kitchen' : 'Kolhapuri Kitchen';
+                    }
+                    
+                    showNotification('Login successful!');
+                } else {
+                    throw new Error('Invalid credentials');
+                }
+                
+            } catch (error) {
+                showNotification('Invalid email or password', 'error');
+            } finally {
+                // Hide loading
+                loginText.classList.remove('hidden');
+                spinner.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        }
+
+        function logout() {
+            currentRole = null;
+            localStorage.removeItem('userRole');
+            document.getElementById('role-language-selector').classList.remove('hidden');
+            switchView('customer-view'); // Hide current view
+        }
+
+        function loadMenuItems() {
+            // TODO: Load menu items from Firebase
+            // Items are already in HTML for demo
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+                document.querySelectorAll('.modal, #order-modal, #order-tracking-modal, #login-modal, #add-menu-modal').forEach(modal => {
+                    modal.classList.add('hidden');
+                });
+            }
+        });
+
+        // Close tracking modal
+        document.getElementById('close-tracking-modal').addEventListener('click', function() {
+            document.getElementById('order-tracking-modal').classList.add('hidden');
+        });
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+        // Mock real-time updates (replace with Firebase listeners)
+        (() => {
+            // Simulate real-time order updates
+            setInterval(() => {
+                // TODO: Replace with Firebase onSnapshot listeners
+                // This would listen for real-time order updates
+            }, 5000);
+        })();
+    </script>
+</body>
+</html>
