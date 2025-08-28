@@ -34,8 +34,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       await login(email, password);
       showNotification(getTranslation('login_successful', language), 'success');
       onSuccess();
-    } catch (error) {
-      showNotification(getTranslation('invalid_credentials', language), 'error');
+    } catch (error: any) {
+      showNotification(
+        error.message || getTranslation('invalid_credentials', language),
+        'error'
+      );
     } finally {
       setLoading(false);
     }

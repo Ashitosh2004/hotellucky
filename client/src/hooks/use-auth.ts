@@ -33,9 +33,26 @@ export const useAuth = () => {
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      throw new Error('Invalid email or password');
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Set role after successful login
+      const storedRole = localStorage.getItem('userRole');
+      if (storedRole) {
+        setUser({
+          uid: userCredential.user.uid,
+          email: userCredential.user.email || '',
+          role: storedRole as UserRole
+        });
+      }
+    } catch (error: any) {
+      console.error('Firebase auth error:', error.code, error.message);
+      if (error.code === 'auth/invalid-credential') {
+        throw new Error('Invalid email or password. Please try again.');
+      } else if (error.code === 'auth/too-many-requests') {
+        throw new Error('Too many login attempts. Please try again later.');
+      } else {
+        throw new Error(error.message || 'Login failed. Please try again.');
+      }
     }
   };
 
