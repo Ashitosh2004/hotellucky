@@ -13,17 +13,17 @@ export const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) =>
       { delay: 0, phase: 1 },      // Logo appears
       { delay: 800, phase: 2 },    // Text appears
       { delay: 1600, phase: 3 },   // Sparkles animation
-      { delay: 2800, phase: 4 },   // Fade out and complete
+      { delay: 2600, phase: 4 },   // Fade out and complete
     ];
 
     phases.forEach(({ delay, phase }) => {
       setTimeout(() => setAnimationPhase(phase), delay);
     });
 
-    // Complete the intro after all animations
+    // Complete the intro after all animations with smoother transition
     setTimeout(() => {
       onComplete();
-    }, 3200);
+    }, 3000);
   }, [onComplete]);
 
   return (

@@ -4,6 +4,7 @@ import { getTranslation } from '@/lib/translations';
 import { Settings, LogOut, Receipt, DollarSign, Clock, TrendingUp, Plus, List, BarChart3, Trash2, QrCode, Edit3 } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { AddMenuItemModal } from './AddMenuItemModal';
+import { EarningsChart } from './EarningsChart';
 import { useFirestore } from '@/hooks/use-firestore';
 import { useAuth } from '@/hooks/use-auth';
 import { useNotification } from './Notification';
@@ -313,17 +314,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
 
-        {/* Sales Chart Placeholder */}
-        <div className="card-modern rounded-xl shadow-lg p-4 sm:p-6 animate-scale-in hover-lift animate-delay-500">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">Daily Sales Overview</h3>
-          <div className="h-48 sm:h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-            <div className="text-center text-gray-500 p-4">
-              <BarChart3 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-base sm:text-lg">Sales Chart</p>
-              <p className="text-xs sm:text-sm">Real-time analytics from Firebase data</p>
-              <p className="text-xs mt-2">Chart implementation can be added with recharts</p>
-            </div>
-          </div>
+        {/* Analytics Charts */}
+        <div className="animate-scale-in hover-lift animate-delay-500">
+          <EarningsChart language={language} />
         </div>
       </main>
 

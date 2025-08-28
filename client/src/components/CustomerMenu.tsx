@@ -57,12 +57,10 @@ export const CustomerMenu: React.FC<CustomerMenuProps> = ({
               </h1>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <div className="hidden sm:block">
-                <LanguageSwitcher
-                  currentLanguage={language}
-                  onLanguageChange={onLanguageChange}
-                />
-              </div>
+              <LanguageSwitcher
+                currentLanguage={language}
+                onLanguageChange={onLanguageChange}
+              />
               {qrCodeUrl && (
                 <button 
                   onClick={() => setShowQrModal(true)}
