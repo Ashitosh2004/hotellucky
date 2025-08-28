@@ -158,7 +158,7 @@ export const KitchenDashboard: React.FC<KitchenDashboardProps> = ({
                 }`}
                 data-testid={`status-filter-${status}`}
               >
-                {status === 'all' ? 'All Orders' : getTranslation(status === 'new' ? 'new_orders' : status, language)}
+                {status === 'all' ? getTranslation('all_orders', language) : getTranslation(status === 'new' ? 'new_orders' : status, language)}
               </button>
             ))}
           </div>
@@ -169,8 +169,8 @@ export const KitchenDashboard: React.FC<KitchenDashboardProps> = ({
           {filteredOrders.length === 0 ? (
             <div className="col-span-full text-center py-8 sm:py-12">
               <Clock className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-gray-500 text-base sm:text-lg">No orders found</p>
-              <p className="text-gray-400 text-sm sm:text-base">Orders will appear here when customers place them</p>
+              <p className="text-gray-500 text-base sm:text-lg">{getTranslation('no_orders_found', language)}</p>
+              <p className="text-gray-400 text-sm sm:text-base">{getTranslation('orders_appear_kitchen', language)}</p>
             </div>
           ) : (
             filteredOrders.map((order) => (
@@ -183,7 +183,7 @@ export const KitchenDashboard: React.FC<KitchenDashboardProps> = ({
                   <div className="mb-2 sm:mb-0 flex-1 min-w-0">
                     <h3 className="font-semibold text-base sm:text-lg mb-1 truncate">{order.menuItemName}</h3>
                     <p className="text-xs sm:text-sm text-gray-600">
-                      Table {order.tableNumber} • Qty: {order.quantity}
+                      {getTranslation('table', language)} {order.tableNumber} • {getTranslation('qty', language)}: {order.quantity}
                     </p>
                     <p className="text-base sm:text-lg font-bold text-orange-500">₹{order.totalAmount}</p>
                   </div>
@@ -194,15 +194,15 @@ export const KitchenDashboard: React.FC<KitchenDashboardProps> = ({
                 </div>
 
                 <div className="text-xs text-gray-500 mb-3 sm:mb-4">
-                  <p className="truncate">Ordered: {order.createdAt.toLocaleString()}</p>
+                  <p className="truncate">{getTranslation('ordered_time', language)}: {order.createdAt.toLocaleString()}</p>
                   {order.acceptedAt && (
-                    <p className="truncate">Accepted: {order.acceptedAt.toLocaleString()}</p>
+                    <p className="truncate">{getTranslation('accepted_time', language)}: {order.acceptedAt.toLocaleString()}</p>
                   )}
                 </div>
 
                 {order.customerNotes && (
                   <div className="mb-3 sm:mb-4 p-2 bg-blue-50 rounded text-xs sm:text-sm">
-                    <strong>Customer Notes:</strong> {order.customerNotes}
+                    <strong>{getTranslation('customer_notes', language)}:</strong> {order.customerNotes}
                   </div>
                 )}
 

@@ -38,12 +38,12 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
     e.preventDefault();
     
     if (!formData.nameEn || !formData.price) {
-      showNotification('Please fill in all required fields', 'error');
+      showNotification(getTranslation('fill_required_fields', language), 'error');
       return;
     }
 
     if (formData.imageUrl && !isValidImageUrl(formData.imageUrl)) {
-      showNotification('Please enter a valid image URL', 'error');
+      showNotification(getTranslation('valid_image_url', language), 'error');
       return;
     }
 
@@ -69,11 +69,11 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
 
       await addMenuItem(menuItem);
       
-      showNotification('Menu item added successfully!', 'success');
+      showNotification(getTranslation('menu_item_added', language), 'success');
       onClose();
       resetForm();
     } catch (error) {
-      showNotification('Failed to add menu item. Please try again.', 'error');
+      showNotification(getTranslation('failed_add_item', language), 'error');
     } finally {
       setLoading(false);
     }
@@ -131,14 +131,14 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
           {/* English Name */}
           <div className="animate-slide-left animate-delay-300">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {getTranslation('item_name', language)} (English) *
+              {getTranslation('item_name', language)} {getTranslation('english_label', language)} *
             </label>
             <input 
               type="text" 
               value={formData.nameEn}
               onChange={(e) => handleInputChange('nameEn', e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
-              placeholder="Enter item name"
+              placeholder={getTranslation('enter_item_name', language)}
               required
               data-testid="item-name-en"
             />
@@ -147,14 +147,14 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
           {/* Hindi Name */}
           <div className="animate-slide-right animate-delay-400">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {getTranslation('item_name', language)} (Hindi)
+              {getTranslation('item_name', language)} {getTranslation('hindi_label', language)}
             </label>
             <input 
               type="text" 
               value={formData.nameHi}
               onChange={(e) => handleInputChange('nameHi', e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
-              placeholder="हिंदी नाम दर्ज करें"
+              placeholder={getTranslation('enter_hindi_name', language)}
               data-testid="item-name-hi"
             />
           </div>
@@ -162,14 +162,14 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
           {/* Marathi Name */}
           <div className="animate-slide-left animate-delay-500">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {getTranslation('item_name', language)} (Marathi)
+              {getTranslation('item_name', language)} {getTranslation('marathi_label', language)}
             </label>
             <input 
               type="text" 
               value={formData.nameMr}
               onChange={(e) => handleInputChange('nameMr', e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
-              placeholder="मराठी नाव टाका"
+              placeholder={getTranslation('enter_marathi_name', language)}
               data-testid="item-name-mr"
             />
           </div>
@@ -177,14 +177,14 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
           {/* English Description */}
           <div className="animate-slide-right animate-delay-300">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {getTranslation('description', language)} (English)
+              {getTranslation('description', language)} {getTranslation('english_label', language)}
             </label>
             <textarea 
               value={formData.descEn}
               onChange={(e) => handleInputChange('descEn', e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
               rows={3} 
-              placeholder="Enter description"
+              placeholder={getTranslation('enter_description', language)}
               data-testid="item-desc-en"
             />
           </div>
@@ -199,7 +199,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
               value={formData.price}
               onChange={(e) => handleInputChange('price', e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
-              placeholder="Enter price" 
+              placeholder={getTranslation('enter_price', language)} 
               min="1"
               required
               data-testid="item-price"
@@ -247,11 +247,11 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
                   }}
                   data-testid="image-preview"
                 />
-                <p className="text-xs text-gray-500 mt-1 text-center">Image Preview</p>
+                <p className="text-xs text-gray-500 mt-1 text-center">{getTranslation('image_preview', language)}</p>
               </div>
             )}
             <p className="text-xs text-gray-500 mt-1">
-              Enter a direct image URL (jpg, png, gif, webp, svg)
+              {getTranslation('image_url_help', language)}
             </p>
           </div>
           

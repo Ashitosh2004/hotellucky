@@ -116,6 +116,18 @@ export const useFirestore = () => {
     }
   };
 
+  const cancelOrder = async (orderId: string): Promise<void> => {
+    try {
+      await updateDoc(doc(db, 'orders', orderId), {
+        status: 'rejected',
+        updatedAt: Timestamp.now(),
+        kitchenNotes: 'Cancelled by customer'
+      });
+    } catch (error) {
+      throw new Error('Failed to cancel order');
+    }
+  };
+
   const getOrdersByCategory = (category: MenuCategory): Order[] => {
     return orders.filter(order => order.category === category);
   };
@@ -163,6 +175,7 @@ export const useFirestore = () => {
     addMenuItem,
     addOrder,
     updateOrderStatus,
+    cancelOrder,
     getOrdersByCategory,
     getOrdersByStatus,
     getTodayStats

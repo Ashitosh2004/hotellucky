@@ -1,25 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Language, MenuItem, MenuCategory } from '@/types';
 import { getTranslation } from '@/lib/translations';
-import { Utensils, Receipt } from 'lucide-react';
+import { Utensils, Receipt, LogOut } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { OrderModal } from './OrderModal';
 import { OrderTrackingModal } from './OrderTrackingModal';
+import { CustomerLogoutModal } from './CustomerLogoutModal';
 import { useFirestore } from '@/hooks/use-firestore';
 
 interface CustomerMenuProps {
   language: Language;
   onLanguageChange: (language: Language) => void;
+  onLogout?: () => void;
 }
 
 export const CustomerMenu: React.FC<CustomerMenuProps> = ({ 
   language, 
-  onLanguageChange 
+  onLanguageChange,
+  onLogout 
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory | 'all'>('all');
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { menuItems, orders } = useFirestore();
 
   // Get active orders count for current session
@@ -75,6 +79,17 @@ export const CustomerMenu: React.FC<CustomerMenuProps> = ({
                   </span>
                 )}
               </button>
+              {onLogout && (
+                <button 
+                  onClick={() => setShowLogoutModal(true)}
+                  className="bg-red-500 text-white px-2 sm:px-4 py-2 rounded-lg hover:bg-red-600 transition-all duration-300 btn-modern hover-lift text-xs sm:text-sm"
+                  data-testid="customer-logout-btn"
+                >
+                  <LogOut className="mr-1 sm:mr-2" size={14} />
+                  <span className="hidden sm:inline">{getTranslation('logout', language)}</span>
+                  <span className="sm:hidden">Exit</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -181,6 +196,17 @@ export const CustomerMenu: React.FC<CustomerMenuProps> = ({
       <OrderTrackingModal
         isOpen={showTrackingModal}
         onClose={() => setShowTrackingModal(false)}
+        language={language}
+      />
+
+      <CustomerLogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onLogout={() => {
+          if (onLogout) {
+            onLogout();
+          }
+        }}
         language={language}
       />
     </div>

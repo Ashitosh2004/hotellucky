@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Language, Order, OrderStatus } from '@/types';
 import { getTranslation } from '@/lib/translations';
-import { X, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Clock, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
 import { useFirestore } from '@/hooks/use-firestore';
+import { useNotification } from './Notification';
 
 interface OrderTrackingModalProps {
   isOpen: boolean;
@@ -15,9 +16,31 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
   onClose, 
   language 
 }) => {
-  const { orders } = useFirestore();
+  const { orders, cancelOrder } = useFirestore();
+  const { showNotification } = useNotification();
+  const [cancellingOrder, setCancellingOrder] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!confirm(getTranslation('cancel_order_confirmation', language))) {
+      return;
+    }
+
+    setCancellingOrder(orderId);
+    try {
+      await cancelOrder(orderId);
+      showNotification(getTranslation('order_cancelled', language), 'success');
+    } catch (error) {
+      showNotification('Failed to cancel order. Please try again.', 'error');
+    } finally {
+      setCancellingOrder(null);
+    }
+  };
+
+  const canCancelOrder = (order: Order) => {
+    return order.status === 'new' || order.status === 'accepted';
+  };
 
   const getStatusIcon = (status: OrderStatus) => {
     switch (status) {
@@ -97,7 +120,7 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
                   <div>
                     <h3 className="font-semibold text-lg">{order.menuItemName}</h3>
                     <p className="text-sm text-gray-600">
-                      Table {order.tableNumber} • Qty: {order.quantity}
+                      {getTranslation('table', language)} {order.tableNumber} • {getTranslation('qty', language)}: {order.quantity}
                     </p>
                   </div>
                   <div className="text-right">
@@ -110,15 +133,29 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
                 </div>
                 
                 <div className="flex justify-between text-xs text-gray-500">
-                  <span>Ordered: {order.createdAt.toLocaleTimeString()}</span>
+                  <span>{getTranslation('ordered_time', language)}: {order.createdAt.toLocaleTimeString()}</span>
                   {order.preparedAt && (
-                    <span>Ready: {order.preparedAt.toLocaleTimeString()}</span>
+                    <span>{getTranslation('ready_time', language)}: {order.preparedAt.toLocaleTimeString()}</span>
                   )}
                 </div>
                 
                 {order.kitchenNotes && (
                   <div className="mt-2 p-2 bg-blue-50 rounded text-sm">
-                    <strong>Kitchen Notes:</strong> {order.kitchenNotes}
+                    <strong>{getTranslation('kitchen_notes', language)}:</strong> {order.kitchenNotes}
+                  </div>
+                )}
+                
+                {canCancelOrder(order) && (
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      onClick={() => handleCancelOrder(order.id)}
+                      disabled={cancellingOrder === order.id}
+                      className="bg-red-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 btn-modern hover-lift flex items-center"
+                      data-testid={`cancel-order-${order.id}`}
+                    >
+                      <Trash2 size={12} className="mr-1" />
+                      {cancellingOrder === order.id ? getTranslation('loading', language) : getTranslation('cancel_order', language)}
+                    </button>
                   </div>
                 )}
               </div>

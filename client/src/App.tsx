@@ -97,6 +97,7 @@ function App() {
         <CustomerMenu
           language={currentLanguage}
           onLanguageChange={handleLanguageChange}
+          onLogout={handleLogout}
         />
       )}
 
