@@ -24,6 +24,10 @@ export const useFirestore = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
 
+  // QR Code Settings
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+  const [qrLoading, setQrLoading] = useState(true);
+
   // Load menu items
   useEffect(() => {
     const q = query(collection(db, 'menuItems'), orderBy('createdAt', 'desc'));
@@ -31,11 +35,14 @@ export const useFirestore = () => {
       const items: MenuItem[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        items.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date()
-        } as MenuItem);
+        // Filter out deleted items
+        if (!data.isDeleted) {
+          items.push({
+            id: doc.id,
+            ...data,
+            createdAt: data.createdAt?.toDate() || new Date()
+          } as MenuItem);
+        }
       });
       setMenuItems(items);
       setMenuLoading(false);
@@ -63,6 +70,22 @@ export const useFirestore = () => {
       });
       setOrders(ordersList);
       setOrdersLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Load QR Code Settings
+  useEffect(() => {
+    const q = query(collection(db, 'settings'), where('type', '==', 'qr_code'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const qrData = snapshot.docs[0].data();
+        setQrCodeUrl(qrData.imageUrl || '');
+      } else {
+        setQrCodeUrl('');
+      }
+      setQrLoading(false);
     });
 
     return () => unsubscribe();
@@ -144,7 +167,10 @@ export const useFirestore = () => {
       order.createdAt >= today
     );
 
-    const todayRevenue = todayOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+    // Calculate revenue only from non-cancelled orders
+    const todayRevenue = todayOrders
+      .filter(order => order.status !== 'rejected')
+      .reduce((sum, order) => sum + order.totalAmount, 0);
     
     const completedOrders = todayOrders.filter(order => 
       order.status === 'delivered'
@@ -167,15 +193,56 @@ export const useFirestore = () => {
     };
   };
 
+  const deleteMenuItem = async (itemId: string): Promise<void> => {
+    try {
+      await updateDoc(doc(db, 'menuItems', itemId), {
+        isDeleted: true,
+        deletedAt: Timestamp.now()
+      });
+    } catch (error) {
+      throw new Error('Failed to delete menu item');
+    }
+  };
+
+  const updateQrCode = async (imageUrl: string): Promise<void> => {
+    try {
+      const q = query(collection(db, 'settings'), where('type', '==', 'qr_code'));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        // Update existing QR code
+        const docId = snapshot.docs[0].id;
+        await updateDoc(doc(db, 'settings', docId), {
+          imageUrl,
+          updatedAt: Timestamp.now()
+        });
+      } else {
+        // Create new QR code setting
+        await addDoc(collection(db, 'settings'), {
+          type: 'qr_code',
+          imageUrl,
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now()
+        });
+      }
+    } catch (error) {
+      throw new Error('Failed to update QR code');
+    }
+  };
+
   return {
     menuItems,
     menuLoading,
     orders,
     ordersLoading,
+    qrCodeUrl,
+    qrLoading,
     addMenuItem,
     addOrder,
     updateOrderStatus,
     cancelOrder,
+    deleteMenuItem,
+    updateQrCode,
     getOrdersByCategory,
     getOrdersByStatus,
     getTodayStats

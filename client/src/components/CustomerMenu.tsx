@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Language, MenuItem, MenuCategory } from '@/types';
 import { getTranslation } from '@/lib/translations';
-import { Utensils, Receipt, LogOut } from 'lucide-react';
+import { Utensils, Receipt, LogOut, QrCode } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { OrderModal } from './OrderModal';
 import { OrderTrackingModal } from './OrderTrackingModal';
@@ -24,7 +24,8 @@ export const CustomerMenu: React.FC<CustomerMenuProps> = ({
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const { menuItems, orders } = useFirestore();
+  const [showQrModal, setShowQrModal] = useState(false);
+  const { menuItems, orders, qrCodeUrl } = useFirestore();
 
   // Get active orders count for current session
   const activeOrdersCount = orders.filter(order => 
@@ -62,6 +63,17 @@ export const CustomerMenu: React.FC<CustomerMenuProps> = ({
                   onLanguageChange={onLanguageChange}
                 />
               </div>
+              {qrCodeUrl && (
+                <button 
+                  onClick={() => setShowQrModal(true)}
+                  className="bg-blue-500 text-white px-2 sm:px-4 py-2 rounded-lg hover:bg-blue-600 transition-all duration-300 btn-modern hover-lift text-xs sm:text-sm"
+                  data-testid="show-qr-btn"
+                >
+                  <QrCode className="mr-1 sm:mr-2" size={14} />
+                  <span className="hidden sm:inline">Payment QR</span>
+                  <span className="sm:hidden">QR</span>
+                </button>
+              )}
               <button 
                 onClick={() => setShowTrackingModal(true)}
                 className="relative bg-orange-500 text-white px-2 sm:px-4 py-2 rounded-lg hover:bg-orange-600 transition-all duration-300 btn-modern hover-lift text-xs sm:text-sm"
@@ -209,6 +221,35 @@ export const CustomerMenu: React.FC<CustomerMenuProps> = ({
         }}
         language={language}
       />
+
+      {/* QR Code Modal */}
+      {showQrModal && qrCodeUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-sm w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Payment QR Code</h3>
+            <div className="flex justify-center mb-4">
+              <img 
+                src={qrCodeUrl} 
+                alt="Payment QR Code" 
+                className="max-w-full max-h-80 rounded-lg border shadow-lg"
+                data-testid="qr-code-image"
+              />
+            </div>
+            <p className="text-sm text-gray-600 text-center mb-4">
+              Scan this QR code to make payment
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={() => setShowQrModal(false)}
+                className="px-6 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
+                data-testid="qr-close-btn"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
