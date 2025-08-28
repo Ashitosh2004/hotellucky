@@ -16,8 +16,6 @@ export const useAuth = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
       if (firebaseUser) {
-        // In a real app, you'd fetch role from Firestore user document
-        // For this demo, we'll determine role based on stored role
         const storedRole = localStorage.getItem('userRole') as UserRole;
         setUser({
           uid: firebaseUser.uid,
